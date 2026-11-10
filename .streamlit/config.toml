@@ -1,0 +1,18 @@
+# Streamlit settings for the CPT Digitizer.
+# Keeps the app on this computer only and turns off anything that sends data out.
+
+[server]
+# Only accept connections from this computer (not other devices on the network)
+address = "localhost"
+# Do not open a browser window automatically
+headless = true
+# Reject uploads over 50 MB (CPT graph images are much smaller)
+maxUploadSize = 50
+# Protect against cross-site request forgery
+enableXsrfProtection = true
+# Do not watch files for changes (avoids extra file system activity)
+fileWatcherType = "none"
+
+[browser]
+# Do not send usage statistics to Streamlit
+gatherUsageStats = false

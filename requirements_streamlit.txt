@@ -1,0 +1,9 @@
+# Packages for the Streamlit CPT Digitizer (cpt_streamlit_app.py)
+# Install with:  pip install -r requirements_streamlit.txt
+streamlit
+streamlit-image-coordinates
+pillow
+numpy
+pandas
+openpyxl
+altair
