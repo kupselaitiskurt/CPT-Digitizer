@@ -33,7 +33,7 @@ Install the packages used by the digitizer:
 pip install PyQt6 pillow numpy pandas openpyxl
 ```
 
-Note: `requirements.txt` lists packages for the older GeoCalc Pro modules too. You only need the five packages above to run the digitizer.
+The Streamlit version has its own list in `requirements_streamlit.txt` (see below).
 
 ---
 
@@ -103,6 +103,22 @@ Projects are stored in a `.dam_projects` folder inside the project folder, in `p
 
 ---
 
-## Other files in this repository
+## Files
 
-The repository also contains the older GeoCalc Pro modules (`main.py`, `geocalc_app/`, `map_view*.py`, `ags_handler.py`, `borehole_map.py`, `priebe_settlement_calc.py`, and related files). They are not part of the CPT digitizer and are not described here.
+| File | Purpose |
+|---|---|
+| `cpt_digitizer.py` | Desktop version (PyQt6) |
+| `cpt_streamlit_app.py` | Browser version (Streamlit) |
+| `cpt_core.py` | Digitizing and Excel logic used by the Streamlit version |
+| `project_manager.py` | Project and CPT storage used by both versions |
+| `requirements_streamlit.txt` | Packages for the Streamlit version |
+| `.streamlit/config.toml` | Streamlit settings (localhost only, no usage statistics) |
+
+## Streamlit version
+
+```bash
+pip install -r requirements_streamlit.txt
+streamlit run cpt_streamlit_app.py
+```
+
+Then open http://localhost:8501. It runs on your computer only. Use the same workflow as the desktop version: upload a graph image, calibrate both axes, pick the curve colour, extract, then save to a project or export to Excel. Screen capture is not available in the browser, so upload the image file instead.

@@ -67,9 +67,8 @@ except ImportError:
     MPL_AVAILABLE = False
 
 try:
-    from project_ui import ProjectManagerUI
     from project_manager import ProjectManager, CPTData
-    PROJECT_UI_AVAILABLE = True
+    PROJECT_UI_AVAILABLE = True  # project storage is available
 except ImportError:
     PROJECT_UI_AVAILABLE = False
     ProjectManager = None
