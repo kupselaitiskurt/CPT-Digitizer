@@ -1,198 +1,108 @@
-# GeoCalc Pro 🏗️
+# CPT Digitizer
 
-**Professional Geotechnical Engineering Analysis Platform**
+A desktop tool (Python + PyQt6) that digitizes **CPT graphs** from geotechnical reports and exports the data to **Excel** or **CSV**.
 
-A desktop Python application for geotechnical data management, visualization, and engineering calculations. Built with PyQt6 for a professional, expandable engineering workflow.
-
----
-
-## Module 1: Boring Log Import & Site Mapping
-
-### Features
-- 📄 **PDF Report Import** — Upload geotechnical investigation reports
-- 🤖 **AI Extraction** — Claude AI intelligently extracts boring logs, soil layers, N-values, lab data
-- 📏 **Rule-Based Fallback** — Works without API key for standard boring log formats
-- 🗺️ **Interactive Site Map** — Leaflet/Folium map with boring & CPT locations, satellite imagery
-- 📊 **Fence Diagrams** — 2D cross-section views with USCS soil classification colors
-- 💾 **Persistent Database** — SQLite stores all project data locally; works offline
-- 🌐 **Multi-Project** — Manage multiple sites; borings from previous projects appear on map
+It reads a screenshot or image of a CPT plot, lets you calibrate the axes, traces the curve by colour, and samples it at a depth interval. It does not do any engineering calculations.
 
 ---
 
-## Installation
+## What it does
 
-### Prerequisites
-- Python 3.10+
-- Windows 10/11, macOS 12+, or Linux
+- Loads a CPT graph from an image file or a screen capture
+- Digitizes three channels on separate tabs: **qc**, **fs** and **u2**
+- Calibrates each axis from two known points (X = value, Y = depth)
+- Traces the curve by picking its colour, with an adjustable tolerance and a colour-mask preview
+- Samples the curve at a depth interval (default **0.1 ft**, shared across all three channels), or at every image pixel row
+- Shows all channels together on a Summary tab
+- Saves each digitized CPT, with its source image and digitizing setup, into a named project
+- Reloads a saved CPT and restores its image, calibration and points
+- Exports to CSV, to Excel (with native charts), or exports a whole project to one Excel file
 
-### Install Dependencies
+It does not read PDFs, make maps, or perform calculations.
+
+---
+
+## Requirements
+
+- Python 3.10 or newer (developed with Python 3.14)
+- Windows, macOS or Linux
+
+Install the packages used by the digitizer:
 
 ```bash
-# Clone or unzip the project
-cd geocalc_app
-
-# Create virtual environment (recommended)
-python -m venv venv
-
-# Activate:
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
-
-# Install all dependencies
-pip install -r requirements.txt
+pip install PyQt6 pillow numpy pandas openpyxl
 ```
 
-### Run the App
+Note: `requirements.txt` lists packages for the older GeoCalc Pro modules too. You only need the five packages above to run the digitizer.
+
+---
+
+## Running it
+
+From the project folder:
 
 ```bash
-python main.py
+python cpt_digitizer.py
 ```
+
+The window opens with a toolbar at the top and the three channel tabs (qc, fs, u2) plus the Summary tab.
 
 ---
 
-## Configuration
+## Typical workflow
 
-### Claude AI API Key (Optional but Recommended)
+1. **Create a project.** Click **New Project** and enter a name. Projects keep your saved CPTs together.
+2. **Load the graph.** On a channel tab, click **Load Image File…** or **Capture Screen Region**. Use the zoom buttons and **Pan** to find the plot.
+3. **Calibrate X.** Click **Set X-Point 1 →**, then click a known x-value on the image and enter its value. Repeat for **Set X-Point 2 →**.
+4. **Calibrate Y (depth).** Do the same with **Set Y-Point 1 →** and **Set Y-Point 2 →**, using two known depths.
+5. **Pick the curve colour.** Click **Pick Curve Colour**, then click on the curve. Adjust the tolerance slider if needed, and use **Show Colour Mask Preview** to check the trace.
+6. **Set the depth interval.** The default is 0.1 ft. Changing it on one channel changes it on all three. Tick **Every pixel row** to sample at the finest resolution the image allows (never finer than 0.1 ft).
+7. **Extract.** Click **Extract Data**. Use **Preview This Channel** to check the result.
+8. **Repeat for qc, fs and u2.** The Summary tab shows all channels together.
+9. **Save.** Type a CPT name and click **Save CPT** (Ctrl+S). The tabs clear so you can start the next CPT.
+10. **Export.** Use **Export CSV…**, **Export Excel…** (one sheet with all channels, one sheet per channel, and charts) or **Export Project…** (every saved CPT in the project, one sheet per CPT).
 
-The app uses Claude AI for intelligent PDF extraction. Without it, rule-based parsing is used.
+To reload a saved CPT, choose it in the **Load CPT** dropdown. Its image, calibration and points come back. **Delete CPT** and **Delete Project** remove saved data.
 
-1. Get an API key at [console.anthropic.com](https://console.anthropic.com)
-2. In the app: **Settings → AI & API → API Key**
-3. Or enter it in the **Import Report** panel
+### Keyboard shortcuts
 
-The key is stored securely in your system's Qt settings (not in plain text files).
-
----
-
-## Workflow
-
-```
-New Project → Import Report PDF → Review Extracted Data → Save to DB
-     ↓
-  Site Map (view all borings/CPTs on satellite imagery)
-     ↓
-  Fence Diagram (select borings → 2D cross-section)
-     ↓
-  [Future] Engineering Calculations
-```
-
-### Step-by-Step
-
-1. **Create a Project** — Projects tab → New Project → enter name, client, location
-2. **Import a Report** — Import Report tab → Browse PDF → Extract → review tree → Save
-3. **View Map** — Site Map tab shows all borings with clickable popups (soil profile, N-values)
-4. **Fence Diagram** — Select 2+ borings → Generate → cross-section with USCS colors
-5. **Export** — Export map as HTML or fence diagram as PNG
-
----
-
-## Architecture
-
-```
-geocalc_app/
-├── main.py                     # Entry point
-├── requirements.txt
-├── setup.py
-├── geocalc.spec               # PyInstaller build config
-└── geocalc_app/
-    ├── core/
-    │   ├── database.py        # SQLite schema, CRUD operations
-    │   ├── extractor.py       # PDF → structured data (Claude + rules)
-    │   └── mapping.py         # Folium maps, matplotlib fence diagrams
-    ├── ui/
-    │   ├── main_window.py     # Main window, navigation
-    │   ├── project_panel.py   # Project management
-    │   ├── report_panel.py    # PDF import + data review
-    │   ├── map_panel.py       # Interactive Leaflet map
-    │   ├── fence_panel.py     # Fence diagram generator
-    │   └── settings_dialog.py # Settings
-    └── assets/
-        └── style.qss          # Professional dark theme
-```
-
-### Database Schema (SQLite)
-
-| Table | Purpose |
+| Shortcut | Action |
 |---|---|
-| `projects` | Project metadata |
-| `reports` | Uploaded PDF files |
-| `borings` | Boring locations + metadata |
-| `soil_layers` | SPT data, USCS, lab values per boring |
-| `cpt_soundings` | CPT locations |
-| `cpt_data` | qc, fs, u2 readings per depth |
-| `fence_diagrams` | Saved cross-section configurations |
+| Ctrl+S | Save CPT |
+| Ctrl+Shift+S | Export CSV |
+| Ctrl+E | Export Excel |
+| Ctrl+Shift+E | Export Project (all saved CPTs) |
+| Ctrl+P | Preview All |
+| F1 | Help |
 
 ---
 
-## Building an Executable (.exe / .app)
+## Units
 
-```bash
-pip install pyinstaller
-pyinstaller geocalc.spec
-```
-
-The built app will be in `dist/GeoCalcPro/`. Distribute the whole folder or create an installer with NSIS (Windows) or create-dmg (macOS).
+Units are chosen per channel. Defaults are **ft** for depth, **tsf** for qc and fs, and **psi** for u2. Options include MPa, ksf, tsf, psi and kPa for qc; kPa, ksf, tsf, psi and psf for fs; and kPa, psi and psf for u2. Depth can be set to m or ft.
 
 ---
 
-## Planned Modules
+## Where your data is saved
 
-| Module | Status |
-|---|---|
-| Boring Log Import & Site Mapping | ✅ **Complete** |
-| Foundation Drawing Overlay | 🔲 Next |
-| Deep Foundation Calculations (driven/drilled) | 🔲 Planned |
-| Ground Improvement (stone columns, wick drains) | 🔲 Planned |
-| Earth Retention (sheet pile, soldier pile) | 🔲 Planned |
-| Settlement Analysis | 🔲 Planned |
-| Steel Design (AISC) | 🔲 Planned |
-| Concrete Design (ACI) | 🔲 Planned |
-| Arduino Instrumentation / Real-Time Monitoring | 🔲 Planned |
-
----
-
-## Expanding the App
-
-### Adding a New Calculation Module
-
-1. Create `geocalc_app/ui/my_calc_panel.py` (extend `QWidget`)
-2. Add to `main_window.py`:
-   ```python
-   from geocalc_app.ui.my_calc_panel import MyCalcPanel
-   self.my_panel = MyCalcPanel()
-   self.stack.addWidget(self.my_panel)
-   ```
-3. Add a nav button in `_build_sidebar()`
-
-### Adding a New Table to the Database
-
-Add `CREATE TABLE IF NOT EXISTS` in `database.py → initialize_database()`.
-The table is auto-created on next launch.
-
-### Arduino Integration (future)
-
-The `InstrumentationPanel` placeholder is already in the nav. For Arduino:
-- Use `pyserial` for COM port communication
-- Add a `core/arduino_reader.py` with a QThread worker
-- Stream live readings into a new `sensor_readings` table
-- Plot with matplotlib or pyqtgraph for real-time charting
+Projects are stored in a `.dam_projects` folder inside the project folder, in `projects.json`. This folder holds your saved CPT data, so it is not included in the repository. A new copy of the program starts with no projects.
 
 ---
 
 ## Troubleshooting
 
-**"No text extracted from PDF"** — The PDF may be a scanned image. Use Adobe Acrobat or similar to OCR the PDF first, then re-import.
+**"Points missing at some depths"** — Increase the tolerance, or pick the curve colour from a cleaner part of the trace (avoid anti-aliased edges).
 
-**"API key invalid"** — Check the key starts with `sk-ant-`. Keys from console.anthropic.com.
+**Wrong values or an offset** — Zoom in and click exactly on the axis tick marks when you set the calibration points.
 
-**Map not loading** — The map requires internet for satellite tile loading. Street map tiles work offline via cached tiles. Check your firewall.
+**Grid lines are traced along with the curve** — Lower the tolerance until the grid disappears from the mask preview, or pick the colour from a section without grid lines.
 
-**Qt WebEngine not found** — Run: `pip install PyQt6-WebEngine`
+**Coordinates are wrong on a high-DPI screen** — Take the screenshot yourself (for example with the Snipping Tool) and use **Load Image File…**.
+
+**Excel charts don't appear** — Restart the program and export again. Older copies of the program did not write charts.
 
 ---
 
-## License
+## Other files in this repository
 
-GeoCalc Pro — Proprietary. All rights reserved.
+The repository also contains the older GeoCalc Pro modules (`main.py`, `geocalc_app/`, `map_view*.py`, `ags_handler.py`, `borehole_map.py`, `priebe_settlement_calc.py`, and related files). They are not part of the CPT digitizer and are not described here.
